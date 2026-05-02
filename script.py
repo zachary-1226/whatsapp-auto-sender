@@ -5,6 +5,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
 from time import sleep
 import pandas
 
@@ -12,7 +14,17 @@ excel_data = pandas.read_excel('Recipients data.xlsx', sheet_name='Recipients')
 
 count = 0
 
-driver = webdriver.Chrome(ChromeDriverManager().install())
+# 设置 Chrome 选项
+chrome_options = Options()
+# 在 Docker 容器内运行必须启用 Headless 无头模式
+chrome_options.add_argument('--headless')
+chrome_options.add_argument('--no-sandbox')
+chrome_options.add_argument('--disable-dev-shm-usage')
+
+# 显式使用 Service 初始化 Selenium 驱动，完美适配 Selenium 4
+service = Service(ChromeDriverManager().install())
+driver = webdriver.Chrome(service=service, options=chrome_options)
+
 driver.get('https://web.whatsapp.com')
 input("Zachary 的本地服务已启动，请在登录 WhatsApp 网页版并加载完聊天记录后按回车继续...")
 for column in excel_data['Contact'].tolist():
